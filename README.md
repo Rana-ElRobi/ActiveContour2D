@@ -12,6 +12,11 @@ This repository implements greedy active contour 2D
 	* save the image with contours
 	* save contour points in text file same name as its image with contour
 	* load initial contour points points directly from text file
+- Calculate Internal Energy
+	* calculate 1st drivative and get Elasticity factor (Using alpha coefficient)
+	* calculate 2nd drivative and get Curvature factor (Using beta coefficient)
+	* calculate total internal energy at each point (Using Elasticity & Curvature)
+- Calculate External Energy
 
 
 
