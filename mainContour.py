@@ -1,7 +1,7 @@
 # This script implements Active contours for 2D image
-
 # import Needed packages
 import cv2
+import math
 import argparse
 import matplotlib.pyplot as plt
 # Function that loads the target 10 images
@@ -23,13 +23,6 @@ def loadimages():
 		#cv2.imshow("colred img" , tempimg)
 		#cv2.imshow("grey img" , greytemp)
 		#cv2.waitKey(0)
-		# !!!! NOT working !!!
-		# Helper link
-		#  http://stackoverflow.com/questions/27704490/interactive-pixel-information-of-an-image-in-python
-		#fig, ax = plt.subplots()
-		#ax.imshow(tempimg, interpolation='none')
-		#datacursor(hover=True, bbox=dict(alpha=1, fc='w'))
-		#plt.show()
 	#return loaded imgs
 	return colorimgStack , greyimgStack
 # Class for contour initiation per image   
@@ -128,14 +121,93 @@ def loadinitContour(fileName):
 	# append points
 	# close file
 	f.close()
-	print ("lenght of contour :" , len(conPoints))
+	#print ("lenght of contour :" , len(conPoints))
 	return conPoints
-
+# Function that calculates the internal energy
+def internalEnergy(c , a , b):
+	# Inputs : 
+	#---------
+	# c : contour points
+	# a : alpha ( Elasticity coeffecient )
+	# b : beta ( Curveture coeffcient )
+	# ===============
+	# output:
+	#--------
+	# total energy : list of Total Internal energy on each point
+	#======================
+	#======================
+	totalEnergy = []
+	# v_last : contour point before current point 
+	# v_curr : contour current point
+	# v_next : contour point after current point
+	# Loop on contour points
+	for i in range(len(c)):
+		# get current inportant values
+		if(i==0):
+			v_last = c[-1] # make previouse one is the last one
+			v_curr = c[i]
+			v_next = c[i+1]
+		elif (i == (len(c)-1)):
+			v_last = c[i-1]
+			v_curr = c[i]
+			v_next = c[0] # make next one equal 1st one
+		else:
+			v_last = c[i-1]
+			v_curr = c[i]
+			v_next = c[i+1]
+		#print ("v_last :", v_last)
+		#print ("v_curr :", v_curr)
+		#print ("v_next :", v_next)
+		#---------------------------
+		# get 1st drivative
+		firstDrivX = v_next[0] - v_curr[0]
+		firstDrivY = v_next[1] - v_curr[1]
+		firstDriv = (firstDrivX , firstDrivY)
+		#print ("First Drivative :", firstDriv)
+		firstDrivPowerX = math.pow(firstDriv[0] ,2)
+		firstDrivPowerY = math.pow(firstDriv[1] ,2)
+		firstDrivPower = (firstDrivPowerX , firstDrivPowerY)
+		#print ("First Drivative power 2 :", firstDrivPower)
+		# ----------------------------------
+		# Calculate elasticity / stiffness
+		eX = a * firstDrivPower[0]
+		eY = a * firstDrivPower[1]
+		elasticity = (eX , eY)
+		#print ("Elasticity :", elasticity)
+		# ---------------------------------
+		# ========================================
+		####	CLACLULATE 2nd Drivative 	####
+		#-----------------------------------
+		secDrivX = v_next[0] - (2 * v_curr[0]) + v_last[0]
+		secDrivY = v_next[1] - (2 * v_curr[1]) + v_last[1]
+		secDriv = (secDrivX , secDrivY)
+		#print("Secound Drivative :" ,secDriv)
+		secDrivPowerX = math.pow(secDriv[0] ,2)
+		secDrivPowerY = math.pow(secDriv[1] ,2)
+		secDrivPower = (secDrivPowerX , secDrivPowerY)
+		#print ("Secound Drivative power 2 :", secDrivPower)
+		# ----------------------------------
+		# Calculate curvature
+		curX = b * secDrivPower[0]
+		curY = b * secDrivPower[1]
+		curvature = (eX , eY)
+		#print ("Curvature :", curvature)
+		# ---------------------------------
+		# ========================================
+		####	CLACLULATE Total Energy 	####
+		#-----------------------------------
+		eTotalX = elasticity[0] + curvature[0]
+		eTotalY = elasticity[1] + curvature[1]
+		eTotal = (eTotalX , eTotalY)
+		#print ("Total Energy of point {0}:".format(i) , eTotal)
+		totalEnergy.append(eTotal)
+	# return total every list calculated
+	return totalEnergy
 # main function for active contours
 def main():
 	# Load target images
 	colorimgStack , greyimgStack = loadimages()
-	print ("Images loaded successfully")
+	print ("Images loaded : DONE")
 	# initialize contour
 	#baseContours = initContour(colorimgStack)
 	# Save contours in text file
@@ -143,5 +215,12 @@ def main():
 	# Load initial contours
 	ballcontour = loadinitContour('init-0.txt')
 	pencontour = loadinitContour('init-1.txt')
-	print("Initial contour points loaded from file")
+	print("Initial contour points loaded from file : DONE")
+	####	CALCULATE ENERGYIES	 #### 
+	alpha = 0.3 # Elasticity coeffecient
+	beta = 0.1 # Curveture coeffcient
+	# Calculate internal energy 
+	ball_InternalEnergy = internalEnergy(ballcontour,alpha, beta)
+	pen_InternalEnergy = internalEnergy(pencontour,alpha, beta)
+	print ("Calculate internal Energy of contour : DONE")
 main() 
