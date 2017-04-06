@@ -10,7 +10,8 @@ This repository implements greedy active contour 2D
 	* draw contours selected on the target image
 	* draw lines between contour points
 	* save the image with contours
-	* keep contour points for next step
+	* save contour points in text file same name as its image with contour
+	* load initial contour points points directly from text file
 
 
 

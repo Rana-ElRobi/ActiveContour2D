@@ -5,9 +5,9 @@ import cv2
 import argparse
 import matplotlib.pyplot as plt
 # Function that loads the target 10 images
-# 1st five are low degree tumor 
-# 2nd  five are hight degree tumor
 def loadimages():
+	# 1st five are low degree tumor 
+	# 2nd  five are hight degree tumor
 	# initialize empty stacks
 	colorimgStack , greyimgStack = [] ,[]
 	# create reading path
@@ -51,7 +51,7 @@ class Contour():
         centerx = int(currntClick[0])
         centery = int(currntClick[1])
         self.point.append((centerx,centery))
-        print self.point
+        #print self.point
         return self.point
 # function that created objs of countour per image
 def objCreation(imgList):
@@ -59,26 +59,19 @@ def objCreation(imgList):
 	# have ERROR dont know why !!
 	for i in imgList:
 		objList.append(Contour(i))
-		print ("obj list lenght : ", len(objList))
-	#==========================================
-	#so will do it mauall
-	# SAME ERROR!!!!!!!
-	#obj1 = Contour(imgList[0])
-	#objList.append(obj1)
-	#obj2 = Contour(imgList[1])
-	#objList.append(obj2)
+		#print ("obj list lenght : ", len(objList))
 	return objList
 # Function Draw contours 
-# input :
-# -------
-# img : target image need to draw ower it the points
-# points : list of positions where contour is
-# output :
-# -------
-# Displaied image with contour
-# Helper link
-# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
 def drawcontour(im , contourPoints):
+	# input :
+	# -------
+	# img : target image need to draw ower it the points
+	# points : list of positions where contour is
+	# output :
+	# -------
+	# Displaied image with contour
+	# Helper link
+	# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
     for i in contourPoints:
         cv2.circle(im, i, 3 , (255,255,255), thickness=3)
     cv2.imshow("initial contour" , im)
@@ -105,11 +98,50 @@ def initContour(imgList):
 		break
 	# return initial contour
 	return icontours
+# function that saves contour points in text file
+def saveContourPoints(points):
+	# open file
+	f = open('init-0.txt', 'w')
+	# loop on points
+	for p in points:
+		# get current coords
+		x = p[0]
+		y = p[1] 
+		# write in file the current point
+		# Newline
+		f.write('{0} {1} \n'.format(x,y))
+	# close file
+	f.close()
+# function that loads the contour points from text 
+def loadinitContour(fileName):
+	conPoints = []
+	# openfile
+	f = open(fileName, 'r')
+	# read line by line 
+	content = [x.strip('\n') for x in f.readlines()]
+	# split x, y
+	for i ,line in enumerate(content):
+		x,y = line.split()      
+		#print ("x{0}:".format(i) , x)
+		#print ("y{0}:".format(i) , y)
+		conPoints.append((int(x),int(y)))
+	# append points
+	# close file
+	f.close()
+	print ("lenght of contour :" , len(conPoints))
+	return conPoints
 
 # main function for active contours
 def main():
 	# Load target images
 	colorimgStack , greyimgStack = loadimages()
+	print ("Images loaded successfully")
 	# initialize contour
-	baseContours = initContour(colorimgStack)
+	#baseContours = initContour(colorimgStack)
+	# Save contours in text file
+	#saveContourPoints(baseContours[0])
+	# Load initial contours
+	ballcontour = loadinitContour('init-0.txt')
+	pencontour = loadinitContour('init-1.txt')
+	print("Initial contour points loaded from file")
 main() 
