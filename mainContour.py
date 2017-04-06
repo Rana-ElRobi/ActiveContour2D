@@ -111,13 +111,37 @@ def saveContourPoints(points):
 		# Newline
 		f.write('{0} {1} \n'.format(x,y))
 	# close file
+	f.close()
+# function that loads the contour points from text 
+def loadinitContour(fileName):
+	conPoints = []
+	# openfile
+	f = open(fileName, 'r')
+	# read line by line 
+	content = [x.strip('\n') for x in f.readlines()]
+	# split x, y
+	for i ,line in enumerate(content):
+		x,y = line.split()      
+		#print ("x{0}:".format(i) , x)
+		#print ("y{0}:".format(i) , y)
+		conPoints.append((int(x),int(y)))
+	# append points
+	# close file
+	f.close()
+	print ("lenght of contour :" , len(conPoints))
+	return conPoints
 
 # main function for active contours
 def main():
 	# Load target images
 	colorimgStack , greyimgStack = loadimages()
+	print ("Images loaded successfully")
 	# initialize contour
-	baseContours = initContour(colorimgStack)
+	#baseContours = initContour(colorimgStack)
 	# Save contours in text file
-	saveContourPoints(baseContours[0])
+	#saveContourPoints(baseContours[0])
+	# Load initial contours
+	ballcontour = loadinitContour('init-0.txt')
+	pencontour = loadinitContour('init-1.txt')
+	print("Initial contour points loaded from file")
 main() 
