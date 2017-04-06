@@ -51,7 +51,7 @@ class Contour():
         centerx = int(currntClick[0])
         centery = int(currntClick[1])
         self.point.append((centerx,centery))
-        print self.point
+        #print self.point
         return self.point
 # function that created objs of countour per image
 def objCreation(imgList):
@@ -105,6 +105,19 @@ def initContour(imgList):
 		break
 	# return initial contour
 	return icontours
+# function that saves contour points in text file
+def saveContourPoints(points):
+	# open file
+	f = open('init-0.txt', 'w')
+	# loop on points
+	for p in points:
+		# get current coords
+		x = p[0]
+		y = p[1] 
+		# write in file the current point
+		# Newline
+		f.write('{0} {1} \n'.format(x,y))
+	# close file
 
 # main function for active contours
 def main():
@@ -112,4 +125,6 @@ def main():
 	colorimgStack , greyimgStack = loadimages()
 	# initialize contour
 	baseContours = initContour(colorimgStack)
+	# Save contours in text file
+	saveContourPoints(baseContours[0])
 main() 
