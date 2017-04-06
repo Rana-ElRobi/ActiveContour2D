@@ -1,5 +1,4 @@
 # This script implements Active contours for 2D image
-
 # import Needed packages
 import cv2
 import math
@@ -163,11 +162,11 @@ def internalEnergy(c , a , b):
 		firstDrivX = v_next[0] - v_curr[0]
 		firstDrivY = v_next[1] - v_curr[1]
 		firstDriv = (firstDrivX , firstDrivY)
-		print ("First Drivative :", firstDriv)
+		#print ("First Drivative :", firstDriv)
 		firstDrivPowerX = math.pow(firstDriv[0] ,2)
 		firstDrivPowerY = math.pow(firstDriv[1] ,2)
 		firstDrivPower = (firstDrivPowerX , firstDrivPowerY)
-		print ("First Drivative power 2 :", firstDrivPower)
+		#print ("First Drivative power 2 :", firstDrivPower)
 		# ----------------------------------
 		# Calculate elasticity / stiffness
 		eX = a * firstDrivPower[0]
@@ -175,8 +174,28 @@ def internalEnergy(c , a , b):
 		elasticity = (eX , eY)
 		print ("Elasticity :", elasticity)
 		# ---------------------------------
-	# ========================================
-	####	CLACLULATE 2nd Drivative 	####
+		# ========================================
+		####	CLACLULATE 2nd Drivative 	####
+		#-----------------------------------
+		secDrivX = v_next[0] - (2 * v_curr[0]) + v_last[0]
+		secDrivY = v_next[1] - (2 * v_curr[1]) + v_last[1]
+		secDriv = (secDrivX , secDrivY)
+		#print("Secound Drivative :" ,secDriv)
+		secDrivPowerX = math.pow(secDriv[0] ,2)
+		secDrivPowerY = math.pow(secDriv[1] ,2)
+		secDrivPower = (secDrivPowerX , secDrivPowerY)
+		#print ("Secound Drivative power 2 :", secDrivPower)
+		# ----------------------------------
+		# Calculate curvature
+		curX = b * secDrivPower[0]
+		curY = b * secDrivPower[1]
+		curvature = (eX , eY)
+		print ("Curvature :", curvature)
+		# ---------------------------------
+		# ========================================
+		####	CLACLULATE Total Energy 	####
+		#-----------------------------------
+
 # main function for active contours
 def main():
 	# Load target images
