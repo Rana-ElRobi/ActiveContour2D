@@ -5,9 +5,9 @@ import cv2
 import argparse
 import matplotlib.pyplot as plt
 # Function that loads the target 10 images
-# 1st five are low degree tumor 
-# 2nd  five are hight degree tumor
 def loadimages():
+	# 1st five are low degree tumor 
+	# 2nd  five are hight degree tumor
 	# initialize empty stacks
 	colorimgStack , greyimgStack = [] ,[]
 	# create reading path
@@ -59,26 +59,19 @@ def objCreation(imgList):
 	# have ERROR dont know why !!
 	for i in imgList:
 		objList.append(Contour(i))
-		print ("obj list lenght : ", len(objList))
-	#==========================================
-	#so will do it mauall
-	# SAME ERROR!!!!!!!
-	#obj1 = Contour(imgList[0])
-	#objList.append(obj1)
-	#obj2 = Contour(imgList[1])
-	#objList.append(obj2)
+		#print ("obj list lenght : ", len(objList))
 	return objList
 # Function Draw contours 
-# input :
-# -------
-# img : target image need to draw ower it the points
-# points : list of positions where contour is
-# output :
-# -------
-# Displaied image with contour
-# Helper link
-# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
 def drawcontour(im , contourPoints):
+	# input :
+	# -------
+	# img : target image need to draw ower it the points
+	# points : list of positions where contour is
+	# output :
+	# -------
+	# Displaied image with contour
+	# Helper link
+	# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
     for i in contourPoints:
         cv2.circle(im, i, 3 , (255,255,255), thickness=3)
     cv2.imshow("initial contour" , im)
