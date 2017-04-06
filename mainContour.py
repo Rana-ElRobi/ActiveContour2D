@@ -2,6 +2,7 @@
 
 # import Needed packages
 import cv2
+import math
 import argparse
 import matplotlib.pyplot as plt
 # Function that loads the target 10 images
@@ -23,13 +24,6 @@ def loadimages():
 		#cv2.imshow("colred img" , tempimg)
 		#cv2.imshow("grey img" , greytemp)
 		#cv2.waitKey(0)
-		# !!!! NOT working !!!
-		# Helper link
-		#  http://stackoverflow.com/questions/27704490/interactive-pixel-information-of-an-image-in-python
-		#fig, ax = plt.subplots()
-		#ax.imshow(tempimg, interpolation='none')
-		#datacursor(hover=True, bbox=dict(alpha=1, fc='w'))
-		#plt.show()
 	#return loaded imgs
 	return colorimgStack , greyimgStack
 # Class for contour initiation per image   
@@ -130,7 +124,59 @@ def loadinitContour(fileName):
 	f.close()
 	print ("lenght of contour :" , len(conPoints))
 	return conPoints
-
+# Function that calculates the internal energy
+def internalEnergy(c , a , b):
+	# Inputs : 
+	#---------
+	# c : contour points
+	# a : alpha ( Elasticity coeffecient )
+	# b : beta ( Curveture coeffcient )
+	# ===============
+	# output:
+	#--------
+	# Total Interna energy
+	#======================
+	#======================
+	# v_last : contour point before current point 
+	# v_curr : contour current point
+	# v_next : contour point after current point
+	# Loop on contour points
+	for i in range(len(c)):
+		# get current inportant values
+		if(i==0):
+			v_last = c[-1] # make previouse one is the last one
+			v_curr = c[i]
+			v_next = c[i+1]
+		elif (i == (len(c)-1)):
+			v_last = c[i-1]
+			v_curr = c[i]
+			v_next = c[0] # make next one equal 1st one
+		else:
+			v_last = c[i-1]
+			v_curr = c[i]
+			v_next = c[i+1]
+		#print ("v_last :", v_last)
+		#print ("v_curr :", v_curr)
+		#print ("v_next :", v_next)
+		#---------------------------
+		# get 1st drivative
+		firstDrivX = v_next[0] - v_curr[0]
+		firstDrivY = v_next[1] - v_curr[1]
+		firstDriv = (firstDrivX , firstDrivY)
+		print ("First Drivative :", firstDriv)
+		firstDrivPowerX = math.pow(firstDriv[0] ,2)
+		firstDrivPowerY = math.pow(firstDriv[1] ,2)
+		firstDrivPower = (firstDrivPowerX , firstDrivPowerY)
+		print ("First Drivative power 2 :", firstDrivPower)
+		# ----------------------------------
+		# Calculate elasticity / stiffness
+		eX = a * firstDrivPower[0]
+		eY = a * firstDrivPower[1]
+		elasticity = (eX , eY)
+		print ("Elasticity :", elasticity)
+		# ---------------------------------
+	# ========================================
+	####	CLACLULATE 2nd Drivative 	####
 # main function for active contours
 def main():
 	# Load target images
@@ -144,4 +190,9 @@ def main():
 	ballcontour = loadinitContour('init-0.txt')
 	pencontour = loadinitContour('init-1.txt')
 	print("Initial contour points loaded from file")
+	####	CALCULATE ENERGYIES	 #### 
+	alpha = 0.3 # Elasticity coeffecient
+	beta = 0.1 # Curveture coeffcient
+	# Calculate internal energy 
+	internalEnergy(ballcontour,alpha, beta)
 main() 
