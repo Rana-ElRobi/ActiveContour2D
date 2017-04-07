@@ -17,6 +17,10 @@ This repository implements greedy active contour 2D
 	* calculate 2nd drivative and get Curvature factor (Using beta coefficient)
 	* calculate total internal energy at each point (Using Elasticity & Curvature)
 - Calculate External Energy
+	* Calculate gradient in x and y direction of image using Sobel filter
+	- (Helper link)
+		* http://stackoverflow.com/questions/7185655/applying-the-sobel-filter-using-scipy
+	- save image after edge detection.
 
 
 

@@ -2,7 +2,10 @@
 # import Needed packages
 import cv2
 import math
+import numpy
+import scipy
 import argparse
+from scipy import ndimage
 import matplotlib.pyplot as plt
 # Function that loads the target 10 images
 def loadimages():
@@ -124,11 +127,11 @@ def loadinitContour(fileName):
 	#print ("lenght of contour :" , len(conPoints))
 	return conPoints
 # Function that calculates the internal energy
-def internalEnergy(c , a , b):
+def getinternalEnergy(c , a , b):
 	# Inputs : 
 	#---------
 	# c : contour points
-	# a : alpha ( Elasticity coeffecient )
+	# a : alpha ( Elasticity coeffecient ) [should be small to be more elastic]
 	# b : beta ( Curveture coeffcient )
 	# ===============
 	# output:
@@ -203,6 +206,30 @@ def internalEnergy(c , a , b):
 		totalEnergy.append(eTotal)
 	# return total every list calculated
 	return totalEnergy
+# function that calculated the image energy (external energy)
+def getExternalEnergy(img):
+	# Input :
+	#--------
+	# img : is grey scale image that need to calculate its energy
+	# ==============
+	# output :
+	# --------
+	# matrix == image size : represents energy value at each position pixel
+	#================================================
+	# Helper link:
+	# http://stackoverflow.com/questions/7185655/applying-the-sobel-filter-using-scipy
+	# lets calculate gradient in X direction 
+	# using soble filter in x direction
+	im = img.astype('int32')
+	dx = ndimage.sobel(im, 0)  # horizontal derivative
+	dy = ndimage.sobel(im, 1)  # vertical derivative
+	mag = numpy.hypot(dx, dy)  # magnitude
+	mag *= 255.0 / numpy.max(mag)  # normalize (Q&D)
+	scipy.misc.imsave('sobel-0.jpg', mag)
+	return mag
+
+
+
 # main function for active contours
 def main():
 	# Load target images
@@ -220,7 +247,14 @@ def main():
 	alpha = 0.3 # Elasticity coeffecient
 	beta = 0.1 # Curveture coeffcient
 	# Calculate internal energy 
-	ball_InternalEnergy = internalEnergy(ballcontour,alpha, beta)
-	pen_InternalEnergy = internalEnergy(pencontour,alpha, beta)
+	ball_InternalEnergy = getinternalEnergy(ballcontour,alpha, beta)
+	pen_InternalEnergy = getinternalEnergy(pencontour,alpha, beta)
 	print ("Calculate internal Energy of contour : DONE")
+	# ---------------------------------
+	# Calculate External Energy (Image energy)
+	ball_ExternalEnergy = getExternalEnergy(greyimgStack[0])  
+	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
+	print ("Calculate External Energy of contour : DONE")
+	# ---------------------------------
+
 main() 
