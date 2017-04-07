@@ -124,11 +124,11 @@ def loadinitContour(fileName):
 	#print ("lenght of contour :" , len(conPoints))
 	return conPoints
 # Function that calculates the internal energy
-def internalEnergy(c , a , b):
+def getinternalEnergy(c , a , b):
 	# Inputs : 
 	#---------
 	# c : contour points
-	# a : alpha ( Elasticity coeffecient )
+	# a : alpha ( Elasticity coeffecient ) [should be small to be more elastic]
 	# b : beta ( Curveture coeffcient )
 	# ===============
 	# output:
@@ -203,6 +203,27 @@ def internalEnergy(c , a , b):
 		totalEnergy.append(eTotal)
 	# return total every list calculated
 	return totalEnergy
+# function that calculated the image energy (external energy)
+def getExternalEnergy(img):
+	# Input :
+	#--------
+	# img : is grey scale image that need to calculate its energy
+	# ==============
+	# output :
+	# --------
+	# matrix == image size : represents energy value at each position pixel
+	#================================================
+	# lets calculate gradient in X direction 
+	# using soble filter in x direction
+	
+
+
+
+
+
+
+
+	
 # main function for active contours
 def main():
 	# Load target images
@@ -220,7 +241,10 @@ def main():
 	alpha = 0.3 # Elasticity coeffecient
 	beta = 0.1 # Curveture coeffcient
 	# Calculate internal energy 
-	ball_InternalEnergy = internalEnergy(ballcontour,alpha, beta)
-	pen_InternalEnergy = internalEnergy(pencontour,alpha, beta)
+	ball_InternalEnergy = getinternalEnergy(ballcontour,alpha, beta)
+	pen_InternalEnergy = getinternalEnergy(pencontour,alpha, beta)
 	print ("Calculate internal Energy of contour : DONE")
+	# ---------------------------------
+	# Calculate External Energy (Image energy)
+	ball_ExternalEnergy = getExternalEnergy(greyimgStack[0])  
 main() 
