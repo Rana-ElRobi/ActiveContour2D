@@ -256,5 +256,12 @@ def main():
 	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
-
+	####	UPDATE	CONTOUR	POINTS 	####	
+	updatedPoints = 0 # counter for points that changed from iteration to another
+	for i , p in enumerate(ballcontour):	# loop on contour points 
+		currPoint = p
+		currWindow = []		# empty window 
+		for w in range(-4,5):	# loop to fill the current window
+			currWindow.append(ballcontour[i+w])
+		
 main() 
