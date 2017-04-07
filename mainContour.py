@@ -256,5 +256,25 @@ def main():
 	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
-
+	####	UPDATE	CONTOUR	POINTS 	####	
+	updatedPoints = 0 # counter for points that changed from iteration to another
+	for i , p in enumerate(ballcontour):	# loop on contour points 
+		currPoint = p
+		currWindow = []		# empty window with pixel positions
+		currWindowEnergy = []		# empty window with pixel Energies
+		for w in range(-4,5):	# loop to fill the current window
+			currWindow.append(ballcontour[i+w])
+		for pixel in range(0,9): # loop to calculate energy at each pixel
+			# currPixelEnergy = External energy + Internal energy
+			currPixelEnergy = ball_ExternalEnergy[currWindow[pixel][0],currWindow[pixel][1]] + ball_InternalEnergy[i]
+			#print("currWindow x :", currWindow[0][0])
+			#print("currWindow y :", currWindow[0][1])
+			#print ("ball_ExternalEnergy :", ball_ExternalEnergy[currWindow[pixel][0],currWindow[pixel][1]])
+			#print("ball_InternalEnergy[i] :",ball_InternalEnergy[i]) 
+			currWindowEnergy.append(currPixelEnergy)
+		#print("currWindowEnergy :",currWindowEnergy)	
+		#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
+		#----------------------------------------------------
+		# Now lets check where is minmum energy in the window to move the point
+		
 main() 

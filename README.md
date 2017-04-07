@@ -21,6 +21,10 @@ This repository implements greedy active contour 2D
 	- (Helper link)
 		* http://stackoverflow.com/questions/7185655/applying-the-sobel-filter-using-scipy
 	- save image after edge detection.
+- Update Contour points
+	* Get a window 3X3 arount each point
+	* Calculate on each point the energy
+	* Move the point to the pixel wher the minimum energy is.
 
 
 
