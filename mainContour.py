@@ -172,10 +172,16 @@ def getinternalEnergy(c , a , b):
 		firstDrivPower = (firstDrivPowerX , firstDrivPowerY)
 		#print ("First Drivative power 2 :", firstDrivPower)
 		# ----------------------------------
+		# Calculate elasticity MAGNITUTE
+		# m = squ(x^2 +y^2)
+		elasticityMagnitute = math.sqrt(firstDrivPowerX + firstDrivPowerY)
+		#print ("Elasticity  Magnitute :", elasticityMagnitute)
+		# ----------------------------------
 		# Calculate elasticity / stiffness
-		eX = a * firstDrivPower[0]
-		eY = a * firstDrivPower[1]
-		elasticity = (eX , eY)
+		#eX = a * firstDrivPower[0]
+		#eY = a * firstDrivPower[1]
+		#elasticity = (eX , eY)
+		elasticity = a * elasticityMagnitute
 		#print ("Elasticity :", elasticity)
 		# ---------------------------------
 		# ========================================
@@ -190,18 +196,26 @@ def getinternalEnergy(c , a , b):
 		secDrivPower = (secDrivPowerX , secDrivPowerY)
 		#print ("Secound Drivative power 2 :", secDrivPower)
 		# ----------------------------------
+		# Calculate curvature MAGNITUTE
+		# m = squ(x^2 +y^2)
+		CurvatureMagnitute = math.sqrt(secDrivPowerX + secDrivPowerY)
+		#print ("Curvature  Magnitute :", CurvatureMagnitute)
+		# 
+		# ----------------------------------
 		# Calculate curvature
-		curX = b * secDrivPower[0]
-		curY = b * secDrivPower[1]
-		curvature = (eX , eY)
+		#curX = b * secDrivPower[0]
+		#curY = b * secDrivPower[1]
+		#curvature = (curX , curY)
+		curvature = b* CurvatureMagnitute
 		#print ("Curvature :", curvature)
 		# ---------------------------------
 		# ========================================
 		####	CLACLULATE Total Energy 	####
 		#-----------------------------------
-		eTotalX = elasticity[0] + curvature[0]
-		eTotalY = elasticity[1] + curvature[1]
-		eTotal = (eTotalX , eTotalY)
+		#eTotalX = elasticity[0] + curvature[0]
+		#eTotalY = elasticity[1] + curvature[1]
+		#eTotal = (eTotalX , eTotalY)
+		eTotal = elasticity + curvature
 		#print ("Total Energy of point {0}:".format(i) , eTotal)
 		totalEnergy.append(eTotal)
 	# return total every list calculated
@@ -227,8 +241,49 @@ def getExternalEnergy(img):
 	mag *= 255.0 / numpy.max(mag)  # normalize (Q&D)
 	scipy.misc.imsave('sobel-0.jpg', mag)
 	return mag
-
-
+# Functon that update Contour points using energies
+def updateContour(colimg , greyimg , initcontour , exEnetgy , inEnergy):
+	newContour = []	# empty list carries the points of the new contour
+	updatedPoints = 0 # counter for points that changed from iteration to another
+	for i , p in enumerate(initcontour):	# loop on contour points 
+		currPoint = p
+		currImg = greyimg
+		currWindow = []		# empty window with pixel positions
+		currWindowEnergy = []		# empty window with pixel Energies
+		for w in range(-4,5):	# loop to fill the current window
+			currWindow.append(currImg[i+w])
+		for pixel in range(0,9): # loop to calculate energy at each pixel
+			# currPixelEnergy = External energy + Internal energy
+			currPixelEnergy = exEnetgy[currWindow[pixel][0],currWindow[pixel][1]] + inEnergy[i]
+			#print("currWindow x :", currWindow[0][0])
+			#print("currWindow y :", currWindow[0][1])
+			#print ("exEnetgy :", exEnetgy[currWindow[pixel][0],currWindow[pixel][1]])
+			#print("inEnergy[i] :",inEnergy[i]) 
+			currWindowEnergy.append(currPixelEnergy)
+		#print("currWindowEnergy :",currWindowEnergy)	
+		#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
+		#----------------------------------------------------
+		# Now lets check where is minmum energy in the window to move the point
+		minEnrgyPixel = min(currWindowEnergy)
+		#print("min Pixel Energy :", minEnrgyPixel)
+		indexMinEnrg = currWindowEnergy.index(minEnrgyPixel)
+		#print("Index of min Pixel Energy :",indexMinEnrg)
+		#-------------------------------------------------------
+		# compare and update contour point location
+		#print("window x of min energy :" , currWindow[indexMinEnrg][0])
+		#print("window y of min energy :" , currWindow[indexMinEnrg][1])
+		if (indexMinEnrg!= 4): # if the min energy is not at the middle of the window
+			newPointContour = (currWindow[indexMinEnrg][0],currWindow[indexMinEnrg][1])
+			newContour.append(newPointContour) # move point to new location
+			updatedPoints = updatedPoints +  1 	# increment counter
+		else:
+			newContour.append(currPoint) # keep point as it is
+	#Check changes in contour points
+	#for u in range(len(initcontour)):
+	#	print (" old point at {0}:".format(u) , initcontour[u])
+	#	print (" new point :" , newContour[u])
+	print("Total number of updated points :" , updatedPoints)
+	return newContour , updatedPoints
 
 # main function for active contours
 def main():
@@ -256,25 +311,9 @@ def main():
 	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
-	####	UPDATE	CONTOUR	POINTS 	####	
-	updatedPoints = 0 # counter for points that changed from iteration to another
-	for i , p in enumerate(ballcontour):	# loop on contour points 
-		currPoint = p
-		currWindow = []		# empty window with pixel positions
-		currWindowEnergy = []		# empty window with pixel Energies
-		for w in range(-4,5):	# loop to fill the current window
-			currWindow.append(ballcontour[i+w])
-		for pixel in range(0,9): # loop to calculate energy at each pixel
-			# currPixelEnergy = External energy + Internal energy
-			currPixelEnergy = ball_ExternalEnergy[currWindow[pixel][0],currWindow[pixel][1]] + ball_InternalEnergy[i]
-			#print("currWindow x :", currWindow[0][0])
-			#print("currWindow y :", currWindow[0][1])
-			#print ("ball_ExternalEnergy :", ball_ExternalEnergy[currWindow[pixel][0],currWindow[pixel][1]])
-			#print("ball_InternalEnergy[i] :",ball_InternalEnergy[i]) 
-			currWindowEnergy.append(currPixelEnergy)
-		#print("currWindowEnergy :",currWindowEnergy)	
-		#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
-		#----------------------------------------------------
-		# Now lets check where is minmum energy in the window to move the point
-		
+	####	UPDATE	CONTOUR	POINTS 	####
+	ball_updatedContour , ball_updatedNumb = updateContour(colorimgStack[0],greyimgStack[0],
+												ballcontour,ball_ExternalEnergy,ball_InternalEnergy)  
+
+
 main() 
