@@ -172,10 +172,16 @@ def getinternalEnergy(c , a , b):
 		firstDrivPower = (firstDrivPowerX , firstDrivPowerY)
 		#print ("First Drivative power 2 :", firstDrivPower)
 		# ----------------------------------
+		# Calculate elasticity MAGNITUTE
+		# m = squ(x^2 +y^2)
+		elasticityMagnitute = math.sqrt(firstDrivPowerX + firstDrivPowerY)
+		#print ("Elasticity  Magnitute :", elasticityMagnitute)
+		# ----------------------------------
 		# Calculate elasticity / stiffness
-		eX = a * firstDrivPower[0]
-		eY = a * firstDrivPower[1]
-		elasticity = (eX , eY)
+		#eX = a * firstDrivPower[0]
+		#eY = a * firstDrivPower[1]
+		#elasticity = (eX , eY)
+		elasticity = a * elasticityMagnitute
 		#print ("Elasticity :", elasticity)
 		# ---------------------------------
 		# ========================================
@@ -190,18 +196,26 @@ def getinternalEnergy(c , a , b):
 		secDrivPower = (secDrivPowerX , secDrivPowerY)
 		#print ("Secound Drivative power 2 :", secDrivPower)
 		# ----------------------------------
+		# Calculate curvature MAGNITUTE
+		# m = squ(x^2 +y^2)
+		CurvatureMagnitute = math.sqrt(secDrivPowerX + secDrivPowerY)
+		#print ("Curvature  Magnitute :", CurvatureMagnitute)
+		# 
+		# ----------------------------------
 		# Calculate curvature
-		curX = b * secDrivPower[0]
-		curY = b * secDrivPower[1]
-		curvature = (eX , eY)
+		#curX = b * secDrivPower[0]
+		#curY = b * secDrivPower[1]
+		#curvature = (curX , curY)
+		curvature = b* CurvatureMagnitute
 		#print ("Curvature :", curvature)
 		# ---------------------------------
 		# ========================================
 		####	CLACLULATE Total Energy 	####
 		#-----------------------------------
-		eTotalX = elasticity[0] + curvature[0]
-		eTotalY = elasticity[1] + curvature[1]
-		eTotal = (eTotalX , eTotalY)
+		#eTotalX = elasticity[0] + curvature[0]
+		#eTotalY = elasticity[1] + curvature[1]
+		#eTotal = (eTotalX , eTotalY)
+		eTotal = elasticity + curvature
 		#print ("Total Energy of point {0}:".format(i) , eTotal)
 		totalEnergy.append(eTotal)
 	# return total every list calculated
@@ -256,14 +270,16 @@ def main():
 	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
-	####	UPDATE	CONTOUR	POINTS 	####	
+	####	UPDATE	CONTOUR	POINTS 	####
+	newContour = []	# empty list carries the points of the new contour
 	updatedPoints = 0 # counter for points that changed from iteration to another
 	for i , p in enumerate(ballcontour):	# loop on contour points 
 		currPoint = p
+		currImg = greyimgStack[0]
 		currWindow = []		# empty window with pixel positions
 		currWindowEnergy = []		# empty window with pixel Energies
 		for w in range(-4,5):	# loop to fill the current window
-			currWindow.append(ballcontour[i+w])
+			currWindow.append(currImg[i+w])
 		for pixel in range(0,9): # loop to calculate energy at each pixel
 			# currPixelEnergy = External energy + Internal energy
 			currPixelEnergy = ball_ExternalEnergy[currWindow[pixel][0],currWindow[pixel][1]] + ball_InternalEnergy[i]
@@ -276,5 +292,24 @@ def main():
 		#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
 		#----------------------------------------------------
 		# Now lets check where is minmum energy in the window to move the point
-		
+		minEnrgyPixel = min(currWindowEnergy)
+		#print("min Pixel Energy :", minEnrgyPixel)
+		indexMinEnrg = currWindowEnergy.index(minEnrgyPixel)
+		#print("Index of min Pixel Energy :",indexMinEnrg)
+		#-------------------------------------------------------
+		# compare and update contour point location
+		#print("window x of min energy :" , currWindow[indexMinEnrg][0])
+		#print("window y of min energy :" , currWindow[indexMinEnrg][1])
+		if (indexMinEnrg!= 4): # if the min energy is not at the middle of the window
+			newPointContour = (currWindow[indexMinEnrg][0],currWindow[indexMinEnrg][1])
+			newContour.append(newPointContour) # move point to new location
+			updatedPoints = updatedPoints +  1 	# increment counter
+		else:
+			newContour.append(currPoint) # keep point as it is
+	#Check changes in contour points
+	#for u in range(len(ballcontour)):
+	#	print (" old point at {0}:".format(u) , ballcontour[u])
+	#	print (" new point :" , newContour[u])
+	print("Total number of updated points :" , updatedPoints)
+
 main() 
