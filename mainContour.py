@@ -69,9 +69,10 @@ def drawcontour(im , contourPoints):
 	# Helper link
 	# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
     for i in contourPoints:
-        cv2.circle(im, i, 3 , (255,255,255), thickness=3)
-    cv2.imshow("initial contour" , im)
+        cv2.circle(im, i, 3 , (0,0,255), thickness=3)
+    cv2.imshow("updated ball contour" , im)
     #cv2.imwrite("init-{0}.png".format(i),im)
+    cv2.imwrite("updated-0.png",im)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return im
@@ -283,6 +284,7 @@ def updateContour(colimg , greyimg , initcontour , exEnetgy , inEnergy):
 	#	print (" old point at {0}:".format(u) , initcontour[u])
 	#	print (" new point :" , newContour[u])
 	print("Total number of updated points :" , updatedPoints)
+	newimg = drawcontour(colimg , newContour)
 	return newContour , updatedPoints
 
 # main function for active contours
@@ -307,13 +309,16 @@ def main():
 	print ("Calculate internal Energy of contour : DONE")
 	# ---------------------------------
 	# Calculate External Energy (Image energy)
-	ball_ExternalEnergy = getExternalEnergy(greyimgStack[0])  
-	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
+	#ball_ExternalEnergy = getExternalEnergy(greyimgStack[0])  
+	pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
 	####	UPDATE	CONTOUR	POINTS 	####
 	ball_updatedContour , ball_updatedNumb = updateContour(colorimgStack[0],greyimgStack[0],
 												ballcontour,ball_ExternalEnergy,ball_InternalEnergy)  
+	#pen_updatedContour , pen_updatedNumb = updateContour(colorimgStack[1],greyimgStack[1],
+	#											pencontour,pen_ExternalEnergy,pen_InternalEnergy)  
+	
 
 
 main() 
