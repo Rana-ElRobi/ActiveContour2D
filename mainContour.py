@@ -241,8 +241,49 @@ def getExternalEnergy(img):
 	mag *= 255.0 / numpy.max(mag)  # normalize (Q&D)
 	scipy.misc.imsave('sobel-0.jpg', mag)
 	return mag
-
-
+# Functon that update Contour points using energies
+def updateContour(colimg , greyimg , initcontour , exEnetgy , inEnergy):
+	newContour = []	# empty list carries the points of the new contour
+	updatedPoints = 0 # counter for points that changed from iteration to another
+	for i , p in enumerate(initcontour):	# loop on contour points 
+		currPoint = p
+		currImg = greyimg
+		currWindow = []		# empty window with pixel positions
+		currWindowEnergy = []		# empty window with pixel Energies
+		for w in range(-4,5):	# loop to fill the current window
+			currWindow.append(currImg[i+w])
+		for pixel in range(0,9): # loop to calculate energy at each pixel
+			# currPixelEnergy = External energy + Internal energy
+			currPixelEnergy = exEnetgy[currWindow[pixel][0],currWindow[pixel][1]] + inEnergy[i]
+			#print("currWindow x :", currWindow[0][0])
+			#print("currWindow y :", currWindow[0][1])
+			#print ("exEnetgy :", exEnetgy[currWindow[pixel][0],currWindow[pixel][1]])
+			#print("inEnergy[i] :",inEnergy[i]) 
+			currWindowEnergy.append(currPixelEnergy)
+		#print("currWindowEnergy :",currWindowEnergy)	
+		#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
+		#----------------------------------------------------
+		# Now lets check where is minmum energy in the window to move the point
+		minEnrgyPixel = min(currWindowEnergy)
+		#print("min Pixel Energy :", minEnrgyPixel)
+		indexMinEnrg = currWindowEnergy.index(minEnrgyPixel)
+		#print("Index of min Pixel Energy :",indexMinEnrg)
+		#-------------------------------------------------------
+		# compare and update contour point location
+		#print("window x of min energy :" , currWindow[indexMinEnrg][0])
+		#print("window y of min energy :" , currWindow[indexMinEnrg][1])
+		if (indexMinEnrg!= 4): # if the min energy is not at the middle of the window
+			newPointContour = (currWindow[indexMinEnrg][0],currWindow[indexMinEnrg][1])
+			newContour.append(newPointContour) # move point to new location
+			updatedPoints = updatedPoints +  1 	# increment counter
+		else:
+			newContour.append(currPoint) # keep point as it is
+	#Check changes in contour points
+	#for u in range(len(initcontour)):
+	#	print (" old point at {0}:".format(u) , initcontour[u])
+	#	print (" new point :" , newContour[u])
+	print("Total number of updated points :" , updatedPoints)
+	return newContour , updatedPoints
 
 # main function for active contours
 def main():
@@ -271,45 +312,8 @@ def main():
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
 	####	UPDATE	CONTOUR	POINTS 	####
-	newContour = []	# empty list carries the points of the new contour
-	updatedPoints = 0 # counter for points that changed from iteration to another
-	for i , p in enumerate(ballcontour):	# loop on contour points 
-		currPoint = p
-		currImg = greyimgStack[0]
-		currWindow = []		# empty window with pixel positions
-		currWindowEnergy = []		# empty window with pixel Energies
-		for w in range(-4,5):	# loop to fill the current window
-			currWindow.append(currImg[i+w])
-		for pixel in range(0,9): # loop to calculate energy at each pixel
-			# currPixelEnergy = External energy + Internal energy
-			currPixelEnergy = ball_ExternalEnergy[currWindow[pixel][0],currWindow[pixel][1]] + ball_InternalEnergy[i]
-			#print("currWindow x :", currWindow[0][0])
-			#print("currWindow y :", currWindow[0][1])
-			#print ("ball_ExternalEnergy :", ball_ExternalEnergy[currWindow[pixel][0],currWindow[pixel][1]])
-			#print("ball_InternalEnergy[i] :",ball_InternalEnergy[i]) 
-			currWindowEnergy.append(currPixelEnergy)
-		#print("currWindowEnergy :",currWindowEnergy)	
-		#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
-		#----------------------------------------------------
-		# Now lets check where is minmum energy in the window to move the point
-		minEnrgyPixel = min(currWindowEnergy)
-		#print("min Pixel Energy :", minEnrgyPixel)
-		indexMinEnrg = currWindowEnergy.index(minEnrgyPixel)
-		#print("Index of min Pixel Energy :",indexMinEnrg)
-		#-------------------------------------------------------
-		# compare and update contour point location
-		#print("window x of min energy :" , currWindow[indexMinEnrg][0])
-		#print("window y of min energy :" , currWindow[indexMinEnrg][1])
-		if (indexMinEnrg!= 4): # if the min energy is not at the middle of the window
-			newPointContour = (currWindow[indexMinEnrg][0],currWindow[indexMinEnrg][1])
-			newContour.append(newPointContour) # move point to new location
-			updatedPoints = updatedPoints +  1 	# increment counter
-		else:
-			newContour.append(currPoint) # keep point as it is
-	#Check changes in contour points
-	#for u in range(len(ballcontour)):
-	#	print (" old point at {0}:".format(u) , ballcontour[u])
-	#	print (" new point :" , newContour[u])
-	print("Total number of updated points :" , updatedPoints)
+	ball_updatedContour , ball_updatedNumb = updateContour(colorimgStack[0],greyimgStack[0],
+												ballcontour,ball_ExternalEnergy,ball_InternalEnergy)  
+
 
 main() 
