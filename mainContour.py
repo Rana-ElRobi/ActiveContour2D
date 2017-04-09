@@ -144,7 +144,7 @@ def getinternalEnergy(c , a , b):
 	# total energy : list of Total Internal energy on each point
 	#======================
 	#======================
-	totalEnergy = []
+	totalEnergy = 0
 	# v_last : contour point before current point 
 	# v_curr : contour current point
 	# v_next : contour point after current point
@@ -222,7 +222,7 @@ def getinternalEnergy(c , a , b):
 		#eTotal = (eTotalX , eTotalY)
 		eTotal = elasticity + curvature
 		#print ("Total Energy of point {0}:".format(i) , eTotal)
-		totalEnergy.append(eTotal)
+		totalEnergy= totalEnergy + eTotal
 	# return total every list calculated
 	return totalEnergy
 # function that calculated the image energy (external energy)
@@ -251,47 +251,52 @@ def getExternalEnergy(img,imgName):
 	return mag
 # Functon that update Contour points using energies
 def updateContour(colimg , greyimg ,imName, initcontour , exEnetgy , inEnergy):
-	newContour = []	# empty list carries the points of the new contour
-	updatedPoints = 0 # counter for points that changed from iteration to another
-	for i , p in enumerate(initcontour):	# loop on contour points 
-		currPoint = p
-		currImg = greyimg
-		currWindow = []		# empty window with pixel positions
-		currWindowEnergy = []		# empty window with pixel Energies
-		for w in range(-4,5):	# loop to fill the current window
-			currWindow.append(currImg[i+w])
-		for pixel in range(0,9): # loop to calculate energy at each pixel
-			# currPixelEnergy = External energy + Internal energy
-			currPixelEnergy = exEnetgy[currWindow[pixel][0],currWindow[pixel][1]] + inEnergy[i]
-			#print("currWindow x :", currWindow[0][0])
-			#print("currWindow y :", currWindow[0][1])
-			#print ("exEnetgy :", exEnetgy[currWindow[pixel][0],currWindow[pixel][1]])
-			#print("inEnergy[i] :",inEnergy[i]) 
-			currWindowEnergy.append(currPixelEnergy)
-		#print("currWindowEnergy :",currWindowEnergy)	
-		#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
-		#----------------------------------------------------
-		# Now lets check where is minmum energy in the window to move the point
-		minEnrgyPixel = min(currWindowEnergy)
-		#print("min Pixel Energy :", minEnrgyPixel)
-		indexMinEnrg = currWindowEnergy.index(minEnrgyPixel)
-		#print("Index of min Pixel Energy :",indexMinEnrg)
-		#-------------------------------------------------------
-		# compare and update contour point location
-		#print("window x of min energy :" , currWindow[indexMinEnrg][0])
-		#print("window y of min energy :" , currWindow[indexMinEnrg][1])
-		if (indexMinEnrg!= 4): # if the min energy is not at the middle of the window
-			newPointContour = (currWindow[indexMinEnrg][0],currWindow[indexMinEnrg][1])
-			newContour.append(newPointContour) # move point to new location
-			updatedPoints = updatedPoints +  1 	# increment counter
-		else:
-			newContour.append(currPoint) # keep point as it is
-	#Check changes in contour points
-	#for u in range(len(initcontour)):
-	#	print (" old point at {0}:".format(u) , initcontour[u])
-	#	print (" new point :" , newContour[u])
-	print("Total number of updated points :" , updatedPoints)
-	newimg = drawcontour(colimg , newContour,(0,255,0),"{0}-updated contour".format(imName))
+	while True:
+		# view imput image
+		I = drawcontour(colimg , initcontour,(255,0,255),"{0}-init contour".format(imName))
+		newContour = []	# empty list carries the points of the new contour
+		updatedPoints = 0 # counter for points that changed from iteration to another
+		for i , p in enumerate(initcontour):	# loop on contour points 
+			currPoint = p
+			currImg = greyimg
+			currWindow = []		# empty window with pixel positions
+			currWindowEnergy = []		# empty window with pixel Energies
+			for w in range(-4,5):	# loop to fill the current window
+				currWindow.append(currImg[i+w])
+			for pixel in range(0,9): # loop to calculate energy at each pixel
+				# currPixelEnergy = External energy + Internal energy
+				currPixelEnergy = exEnetgy[currWindow[pixel][0],currWindow[pixel][1]] + inEnergy
+				#print("currWindow x :", currWindow[0][0])
+				#print("currWindow y :", currWindow[0][1])
+				#print ("exEnetgy :", exEnetgy[currWindow[pixel][0],currWindow[pixel][1]])
+				#print("inEnergy[i] :",inEnergy) 
+				currWindowEnergy.append(currPixelEnergy)
+			#print("currWindowEnergy :",currWindowEnergy)	
+			#print("Lenght currWindowEnergy :",len(currWindowEnergy))	
+			#----------------------------------------------------
+			# Now lets check where is minmum energy in the window to move the point
+			minEnrgyPixel = min(currWindowEnergy)
+			#print("min Pixel Energy :", minEnrgyPixel)
+			indexMinEnrg = currWindowEnergy.index(minEnrgyPixel)
+			#print("Index of min Pixel Energy :",indexMinEnrg)
+			#-------------------------------------------------------
+			# compare and update contour point location
+			#print("window x of min energy :" , currWindow[indexMinEnrg][0])
+			#print("window y of min energy :" , currWindow[indexMinEnrg][1])
+			if (indexMinEnrg!= 4): # if the min energy is not at the middle of the window
+				newPointContour = (currWindow[indexMinEnrg][0],currWindow[indexMinEnrg][1])
+				newContour.append(newPointContour) # move point to new location
+				updatedPoints = updatedPoints +  1 	# increment counter
+			else:
+				newContour.append(currPoint) # keep point as it is
+		#Check changes in contour points
+		#for u in range(len(initcontour)):
+		#	print (" old point at {0}:".format(u) , initcontour[u])
+		#	print (" new point :" , newContour[u])
+		print("Total number of updated points :" , updatedPoints)
+		newimg = drawcontour(colimg , newContour,(255,0,0),"{0}-updated contour".format(imName))
+		if updatedPoints < 10:
+			break
 	saveimage(newimg , "{0}-updated-Contour.png".format(imName))
 	return newContour , updatedPoints
 
@@ -311,9 +316,10 @@ def main():
 	print("Initial contour points loaded from file : DONE")
 	####	CALCULATE ENERGYIES	 #### 
 	alpha = 0.3 # Elasticity coeffecient
-	beta = 0.001 # Curveture coeffcient
+	beta = 10 # Curveture coeffcient
 	# Calculate internal energy 
 	sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
+	#print("sample3_InternalEnergy :",sample1_InternalEnergy)
 	#sample3_InternalEnergy = getinternalEnergy(sample3Contour,alpha, beta)
 	print ("Calculate internal Energy of contour : DONE")
 	# ---------------------------------
