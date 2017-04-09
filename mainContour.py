@@ -15,7 +15,8 @@ def loadimages():
 	colorimgStack , greyimgStack = [] ,[]
 	# create reading path
 	#mainpath = ""
-	targetimgsNames = ["ball.jpg","pen.jpg"]
+	#targetimgsNames = ["ball.jpg","pen.jpg"]
+	targetimgsNames = ["sample1.jpg","sample3.jpg"]
 	for i in targetimgsNames:
 		tempimg = cv2.imread(i)
 		greytemp = cv2.cvtColor(tempimg,cv2.COLOR_BGR2GRAY)
