@@ -235,11 +235,13 @@ def getExternalEnergy(img,imgName):
 	# --------
 	# matrix == image size : represents energy value at each position pixel
 	#================================================
+	# Lets smooth the image using gaussian filter
+	gausImg = scipy.ndimage.filters.gaussian_filter(img, sigma=0.5)
 	# Helper link:
 	# http://stackoverflow.com/questions/7185655/applying-the-sobel-filter-using-scipy
 	# lets calculate gradient in X direction 
 	# using soble filter in x direction
-	im = img.astype('int32')
+	im = gausImg.astype('int32')
 	dx = ndimage.sobel(im, 0)  # horizontal derivative
 	dy = ndimage.sobel(im, 1)  # vertical derivative
 	mag = numpy.hypot(dx, dy)  # magnitude
