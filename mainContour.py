@@ -12,23 +12,25 @@ def loadimages():
 	# 1st five are low degree tumor 
 	# 2nd  five are hight degree tumor
 	# initialize empty stacks
-	colorimgStack , greyimgStack = [] ,[]
+	colorimgStack , greyimgStack ,namesStack = [] ,[],[]
 	# create reading path
 	#mainpath = ""
 	#targetimgsNames = ["ball.jpg","pen.jpg"]
-	targetimgsNames = ["sample1.jpg","sample3.jpg"]
+	targetimgsNames = ["s1.jpg"]
 	for i in targetimgsNames:
 		tempimg = cv2.imread(i)
 		greytemp = cv2.cvtColor(tempimg,cv2.COLOR_BGR2GRAY)
 		# append read images
 		colorimgStack.append(tempimg)
 		greyimgStack.append(greytemp)
+		name =i.split('.')[0]
+		namesStack.append(name)
 		# Test it loaded or not by showing (Works)
 		#cv2.imshow("colred img" , tempimg)
 		#cv2.imshow("grey img" , greytemp)
 		#cv2.waitKey(0)
 	#return loaded imgs
-	return colorimgStack , greyimgStack
+	return colorimgStack , greyimgStack , namesStack
 # Class for contour initiation per image   
 class Contour():
     def __init__(self , targetimage):
@@ -59,7 +61,7 @@ def objCreation(imgList):
 		#print ("obj list lenght : ", len(objList))
 	return objList
 # Function Draw contours 
-def drawcontour(im , contourPoints):
+def drawcontour(im , contourPoints, color,figuername ):
 	# input :
 	# -------
 	# img : target image need to draw ower it the points
@@ -70,15 +72,16 @@ def drawcontour(im , contourPoints):
 	# Helper link
 	# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
     for i in contourPoints:
-        cv2.circle(im, i, 2 , (255,0,255), thickness=2)
-    cv2.imshow("init-s3-contour" , im)
-    #cv2.imwrite("init-{0}.png".format(i),im)
-    cv2.imwrite("init-s3-contour.png",im)
+        cv2.circle(im, i, 2 , color, thickness=2)
+    cv2.imshow(figuername , im)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return im
+# function that saves the image 
+def saveimage(img , name ):
+	cv2.imwrite(name,img)
 # function that initialized the contour manually 
-def initContour(imgList):
+def initContour(imgList,imName):
 	# initialize empty list of lists
 	# each cell have list of 2 cells [x-coords ,y-coords]
 	icontours = []
@@ -89,17 +92,17 @@ def initContour(imgList):
 		currContour = currObj.getCoord()
 		icontours.append(currContour)
 		# draw contour initialized
-		imgwithContour = drawcontour(imgList[1],currContour)
+		imgwithContour = drawcontour(imgList[i],currContour,(255,0,255),"Initial Contour image-{0}".format(imName))
 		# save image with contour
-		cv2.imwrite("init-{0}.png".format(1),imgwithContour)
+		saveimage(imgwithContour ,"{0}-init-contour.png".format(imName))
 		# it works with 1st image only !! dont know why !!!
 		break
 	# return initial contour
 	return icontours
 # function that saves contour points in text file
-def saveContourPoints(points):
+def saveContourPoints(points,fileName):
 	# open file
-	f = open('init-0.txt', 'w')
+	f = open('{0}-init.txt'.format(fileName), 'w')
 	# loop on points
 	for p in points:
 		# get current coords
@@ -223,7 +226,7 @@ def getinternalEnergy(c , a , b):
 	# return total every list calculated
 	return totalEnergy
 # function that calculated the image energy (external energy)
-def getExternalEnergy(img):
+def getExternalEnergy(img,imgName):
 	# Input :
 	#--------
 	# img : is grey scale image that need to calculate its energy
@@ -241,10 +244,11 @@ def getExternalEnergy(img):
 	dy = ndimage.sobel(im, 1)  # vertical derivative
 	mag = numpy.hypot(dx, dy)  # magnitude
 	mag *= 255.0 / numpy.max(mag)  # normalize (Q&D)
-	scipy.misc.imsave('sobel-0.jpg', mag)
+	#scipy.misc.imsave('sobel-0.jpg', mag)
+	saveimage(mag,'{0}-sobel.png'.format(imgName))
 	return mag
 # Functon that update Contour points using energies
-def updateContour(colimg , greyimg , initcontour , exEnetgy , inEnergy):
+def updateContour(colimg , greyimg ,imName, initcontour , exEnetgy , inEnergy):
 	newContour = []	# empty list carries the points of the new contour
 	updatedPoints = 0 # counter for points that changed from iteration to another
 	for i , p in enumerate(initcontour):	# loop on contour points 
@@ -285,39 +289,41 @@ def updateContour(colimg , greyimg , initcontour , exEnetgy , inEnergy):
 	#	print (" old point at {0}:".format(u) , initcontour[u])
 	#	print (" new point :" , newContour[u])
 	print("Total number of updated points :" , updatedPoints)
-	newimg = drawcontour(colimg , newContour)
+	newimg = drawcontour(colimg , newContour,(0,255,0),"{0}-updated contour".format(imName))
+	saveimage(newimg , "{0}-updated-Contour.png".format(imName))
 	return newContour , updatedPoints
 
 # main function for active contours
 def main():
 	# Load target images
-	colorimgStack , greyimgStack = loadimages()
+	colorimgStack , greyimgStack , nameImg = loadimages()
+	#print('{0}-init.txt'.format(nameImg[0]),nameImg[0])
 	print ("Images loaded : DONE")
 	# initialize contour
-	baseContours = initContour(colorimgStack)
+	#baseContours = initContour(colorimgStack ,nameImg)
 	# Save contours in text file
-	saveContourPoints(baseContours[1])
+	#saveContourPoints(baseContours[0],nameImg[0])
 	# Load initial contours
-	#sample1Contour = loadinitContour('init-0.txt')
+	sample1Contour = loadinitContour('{0}-init.txt'.format(nameImg[0]))
 	#sample3Contour = loadinitContour('init-1.txt')
 	print("Initial contour points loaded from file : DONE")
 	####	CALCULATE ENERGYIES	 #### 
 	alpha = 0.3 # Elasticity coeffecient
 	beta = 0.001 # Curveture coeffcient
 	# Calculate internal energy 
-	#sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
+	sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
 	#sample3_InternalEnergy = getinternalEnergy(sample3Contour,alpha, beta)
 	print ("Calculate internal Energy of contour : DONE")
 	# ---------------------------------
 	# Calculate External Energy (Image energy)
-	sample1_ExternalEnergy = getExternalEnergy(greyimgStack[0])  
-	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
+	sample1_ExternalEnergy = getExternalEnergy(greyimgStack[0],nameImg[0])  
+	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1],nameImg[1])  
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
 	####	UPDATE	CONTOUR	POINTS 	####
-	#sample1_updatedContour , sample1_updatedNumb = updateContour(colorimgStack[0],greyimgStack[0],
-	#											sample1Contour,sample1_ExternalEnergy,sample1_InternalEnergy)  
-	#sample3_updatedContour , sample3_updatedNumb = updateContour(colorimgStack[1],greyimgStack[1],
+	sample1_updatedContour , sample1_updatedNumb = updateContour(colorimgStack[0],greyimgStack[0],nameImg[0],
+												sample1Contour,sample1_ExternalEnergy,sample1_InternalEnergy)  
+	#sample3_updatedContour , sample3_updatedNumb = updateContour(colorimgStack[1],greyimgStack[1],nameImg[1],
 	#											sample3Contour,sample3_ExternalEnergy,sample3_InternalEnergy)  
 	
 
