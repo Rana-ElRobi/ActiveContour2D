@@ -68,12 +68,20 @@ def drawcontour(im , contourPoints, color,figuername ):
 	# Displaied image with contour
 	# Helper link
 	# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
-    for i in contourPoints:
-        cv2.circle(im, i, 2 , color, thickness=2)
-    cv2.imshow(figuername , im)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    return im
+	p1 = (0,0)
+	p2 = (0,0)
+    	for i ,p in enumerate(contourPoints):
+        	p1 = p
+       		if (i >= len(contourPoints)-1):
+        		p2 = contourPoints[-1]
+        	else:
+        		p2 = contourPoints[i+1]
+        	cv2.circle(im, p1, 2 , color, thickness=2)
+        	cv2.line(im, p1, p2, color, thickness=2)
+    	cv2.imshow(figuername , im)
+    	cv2.waitKey(0)
+    	cv2.destroyAllWindows()
+    	return im
 # function that saves the image 
 def saveimage(img , name ):
 	cv2.imwrite(name,img)
@@ -89,7 +97,7 @@ def initContour(imgList,imName):
 		currContour = currObj.getCoord()
 		icontours.append(currContour)
 		# draw contour initialized
-		imgwithContour = drawcontour(imgList[i],currContour,(255,0,255),"Initial Contour image-{0}".format(imName))
+		imgwithContour = drawcontour(imgList[i],currContour,(0,255,0),"Initial Contour image-{0}".format(imName))
 		# save image with contour
 		saveimage(imgwithContour ,"{0}-init-contour.png".format(imName))
 		# it works with 1st image only !! dont know why !!!
@@ -244,7 +252,7 @@ def getTotaleEnergy(internal , external):
 	return (external + internal) 
 # Functon that update Contour points using energies
 def updateContour(colimg ,imName, initcontour , exEnergy ,a,b):
-	I = drawcontour(colimg , initcontour,(255,0,255),"{0}-init contour".format(imName))
+	I = drawcontour(colimg , initcontour,(0,255,0),"{0}-init contour".format(imName))
 	for iterate in range(0,2):
 		# view imput image
 		newContour = []	# empty list carries the points of the new contour
@@ -312,18 +320,16 @@ def main():
 	#saveContourPoints(baseContours[0],nameImg[0])
 	# Load initial contours
 	sample1Contour = loadinitContour('{0}-init.txt'.format(nameImg[0]))
-	#sample3Contour = loadinitContour('init-1.txt')
 	print("Initial contour points loaded from file : DONE")
 	####	CALCULATE ENERGYIES	 #### 
 	alpha = 0.0005 # Elasticity coeffecient
 	beta = 15 # Curveture coeffcient
 	# Calculate internal energy 
-	sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
-	print ("Calculate internal Energy of contour : DONE")
+	sample1_ExternalEnergy = getExternalEnergy(greyimgStack[0],nameImg[0])
+	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
 	####	UPDATE	CONTOUR	POINTS 	####
-	sample1_updatedContour , sample1_updatedNumb = updateContour(colorimgStack[0],nameImg[0],
-												sample1Contour,sample1_ExternalEnergy ,alpha,beta)  
+	sample1_updatedContour , sample1_updatedNumb = updateContour(colorimgStack[0],nameImg[0],sample1Contour,sample1_ExternalEnergy ,alpha,beta)  
 	print ("Calculate Total Energy of contour : DONE")
 	
 main() 
