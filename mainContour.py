@@ -26,10 +26,6 @@ def loadimages():
 		greyimgStack.append(greytemp)
 		name =i.split('.')[0]
 		namesStack.append(name)
-		# Test it loaded or not by showing (Works)
-		#cv2.imshow("colred img" , tempimg)
-		#cv2.imshow("grey img" , greytemp)
-		#cv2.waitKey(0)
 	#return loaded imgs
 	return colorimgStack , greyimgStack , namesStack
 # Class for contour initiation per image   
@@ -109,8 +105,7 @@ def saveContourPoints(points,fileName):
 		# get current coords
 		x = p[0]
 		y = p[1] 
-		# write in file the current point
-		# Newline
+		# write in file the current point in Newline
 		f.write('{0} {1} \n'.format(x,y))
 	# close file
 	f.close()
@@ -184,9 +179,7 @@ def getinternalEnergy(c , a , b):
 		#print ("Elasticity  Magnitute :", elasticityMagnitute)
 		# ----------------------------------
 		# Calculate elasticity / stiffness
-		#eX = a * firstDrivPower[0]
-		#eY = a * firstDrivPower[1]
-		#elasticity = (eX , eY)
+		#elasticity = a * elasticityMagnitute
 		elasticity = a * elasticityMagnitute
 		#print ("Elasticity :", elasticity)
 		# ---------------------------------
@@ -209,21 +202,17 @@ def getinternalEnergy(c , a , b):
 		# 
 		# ----------------------------------
 		# Calculate curvature
-		#curX = b * secDrivPower[0]
-		#curY = b * secDrivPower[1]
-		#curvature = (curX , curY)
+		#curvature = bete * CurvatureMagnitute
 		curvature = b* CurvatureMagnitute
 		#print ("Curvature :", curvature)
 		# ---------------------------------
 		# ========================================
 		####	CLACLULATE Total Energy 	####
 		#-----------------------------------
-		#eTotalX = elasticity[0] + curvature[0]
-		#eTotalY = elasticity[1] + curvature[1]
-		#eTotal = (eTotalX , eTotalY)
+		#eTotal = elasticity + curvature
 		eTotal = elasticity + curvature
 		#print ("Total Energy of point {0}:".format(i) , eTotal)
-		totalEnergy= totalEnergy + eTotal
+		totalEnergy +=  eTotal # Summition energies
 	# return total every list calculated
 	return totalEnergy
 # function that calculated the image energy (external energy)
@@ -286,8 +275,6 @@ def updateContour(colimg ,imName, initcontour , exEnergy ,a,b):
 				#print("currPixelEnergy :",currPixelEnergy) 
 				totalwindowEnergy.append(currPixelEnergy)
 				#print("totalwindowEnergy :",totalwindowEnergy[-1])	
-				#break
-				#break	
 			#print("Lenght totalwindowEnergy :",len(totalwindowEnergy))
 			#----------------------------------------------------
 			# Now lets check where is minmum energy in the window to move the point
@@ -311,18 +298,13 @@ def updateContour(colimg ,imName, initcontour , exEnergy ,a,b):
 		#for u in range(len(initcontour)):
 		#	print (" old point at {0}:".format(u) , initcontour[u])
 		#	print (" new point :" , newContour[u])
-			#break
-		#if updatedPoints < 10:
-		#	break
 	newimg = drawcontour(colimg , newContour,(255,0,0),"{0}-updated contour".format(imName))
 	saveimage(newimg , "{0}-updated-Contour.png".format(imName))
 	return newContour , updatedPoints
-
 # main function for active contours
 def main():
 	# Load target images
 	colorimgStack , greyimgStack , nameImg = loadimages()
-	#print('{0}-init.txt'.format(nameImg[0]),nameImg[0])
 	print ("Images loaded : DONE")
 	# initialize contour
 	#baseContours = initContour(colorimgStack ,nameImg)
@@ -337,22 +319,11 @@ def main():
 	beta = 15 # Curveture coeffcient
 	# Calculate internal energy 
 	sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
-	#print("sample3_InternalEnergy :",sample1_InternalEnergy)
-	#sample3_InternalEnergy = getinternalEnergy(sample3Contour,alpha, beta)
 	print ("Calculate internal Energy of contour : DONE")
-	# ---------------------------------
-	# Calculate External Energy (Image energy)
-	sample1_ExternalEnergy = getExternalEnergy(greyimgStack[0],nameImg[0])
-	#print ('sample1_ExternalEnergy :', sample1_ExternalEnergy[80,:])  
-	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1],nameImg[1])  
-	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
 	####	UPDATE	CONTOUR	POINTS 	####
 	sample1_updatedContour , sample1_updatedNumb = updateContour(colorimgStack[0],nameImg[0],
 												sample1Contour,sample1_ExternalEnergy ,alpha,beta)  
-	#sample3_updatedContour , sample3_updatedNumb = updateContour(colorimgStack[1],greyimgStack[1],nameImg[1],
-	#											sample3Contour,sample3_ExternalEnergy,sample3_InternalEnergy)  
+	print ("Calculate Total Energy of contour : DONE")
 	
-
-
 main() 
