@@ -16,7 +16,8 @@ def loadimages():
 	# create reading path
 	#mainpath = ""
 	#targetimgsNames = ["ball.jpg","pen.jpg"]
-	targetimgsNames = ["s1.jpg"]
+	#targetimgsNames = ["s1.jpg"]
+	targetimgsNames = ["s2.jpg"]
 	for i in targetimgsNames:
 		tempimg = cv2.imread(i)
 		greytemp = cv2.cvtColor(tempimg,cv2.COLOR_BGR2GRAY)
@@ -332,10 +333,10 @@ def main():
 	#sample3Contour = loadinitContour('init-1.txt')
 	print("Initial contour points loaded from file : DONE")
 	####	CALCULATE ENERGYIES	 #### 
-	alpha = 0.5 # Elasticity coeffecient
-	beta = 0.5 # Curveture coeffcient
+	alpha = 0.0005 # Elasticity coeffecient
+	beta = 15 # Curveture coeffcient
 	# Calculate internal energy 
-	#sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
+	sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
 	#print("sample3_InternalEnergy :",sample1_InternalEnergy)
 	#sample3_InternalEnergy = getinternalEnergy(sample3Contour,alpha, beta)
 	print ("Calculate internal Energy of contour : DONE")
