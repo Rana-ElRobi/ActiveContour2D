@@ -70,10 +70,10 @@ def drawcontour(im , contourPoints):
 	# Helper link
 	# https://pythonprogramming.net/drawing-writing-python-opencv-tutorial/
     for i in contourPoints:
-        cv2.circle(im, i, 3 , (0,0,255), thickness=3)
-    cv2.imshow("updated ball contour" , im)
+        cv2.circle(im, i, 2 , (255,0,255), thickness=2)
+    cv2.imshow("init-s3-contour" , im)
     #cv2.imwrite("init-{0}.png".format(i),im)
-    cv2.imwrite("updated-0.png",im)
+    cv2.imwrite("init-s3-contour.png",im)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return im
@@ -89,9 +89,9 @@ def initContour(imgList):
 		currContour = currObj.getCoord()
 		icontours.append(currContour)
 		# draw contour initialized
-		imgwithContour = drawcontour(imgList[i],currContour)
+		imgwithContour = drawcontour(imgList[1],currContour)
 		# save image with contour
-		cv2.imwrite("init-{0}.png".format(i),imgwithContour)
+		cv2.imwrite("init-{0}.png".format(1),imgwithContour)
 		# it works with 1st image only !! dont know why !!!
 		break
 	# return initial contour
@@ -294,31 +294,31 @@ def main():
 	colorimgStack , greyimgStack = loadimages()
 	print ("Images loaded : DONE")
 	# initialize contour
-	#baseContours = initContour(colorimgStack)
+	baseContours = initContour(colorimgStack)
 	# Save contours in text file
-	#saveContourPoints(baseContours[0])
+	saveContourPoints(baseContours[1])
 	# Load initial contours
-	ballcontour = loadinitContour('init-0.txt')
-	pencontour = loadinitContour('init-1.txt')
+	#sample1Contour = loadinitContour('init-0.txt')
+	#sample3Contour = loadinitContour('init-1.txt')
 	print("Initial contour points loaded from file : DONE")
 	####	CALCULATE ENERGYIES	 #### 
 	alpha = 0.3 # Elasticity coeffecient
-	beta = 0.1 # Curveture coeffcient
+	beta = 0.001 # Curveture coeffcient
 	# Calculate internal energy 
-	ball_InternalEnergy = getinternalEnergy(ballcontour,alpha, beta)
-	pen_InternalEnergy = getinternalEnergy(pencontour,alpha, beta)
+	#sample1_InternalEnergy = getinternalEnergy(sample1Contour,alpha, beta)
+	#sample3_InternalEnergy = getinternalEnergy(sample3Contour,alpha, beta)
 	print ("Calculate internal Energy of contour : DONE")
 	# ---------------------------------
 	# Calculate External Energy (Image energy)
-	#ball_ExternalEnergy = getExternalEnergy(greyimgStack[0])  
-	pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
+	sample1_ExternalEnergy = getExternalEnergy(greyimgStack[0])  
+	#pen_ExternalEnergy = getExternalEnergy(greyimgStack[1])  
 	print ("Calculate External Energy of contour : DONE")
 	# ---------------------------------
 	####	UPDATE	CONTOUR	POINTS 	####
-	ball_updatedContour , ball_updatedNumb = updateContour(colorimgStack[0],greyimgStack[0],
-												ballcontour,ball_ExternalEnergy,ball_InternalEnergy)  
-	#pen_updatedContour , pen_updatedNumb = updateContour(colorimgStack[1],greyimgStack[1],
-	#											pencontour,pen_ExternalEnergy,pen_InternalEnergy)  
+	#sample1_updatedContour , sample1_updatedNumb = updateContour(colorimgStack[0],greyimgStack[0],
+	#											sample1Contour,sample1_ExternalEnergy,sample1_InternalEnergy)  
+	#sample3_updatedContour , sample3_updatedNumb = updateContour(colorimgStack[1],greyimgStack[1],
+	#											sample3Contour,sample3_ExternalEnergy,sample3_InternalEnergy)  
 	
 
 
